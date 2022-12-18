@@ -39,7 +39,7 @@ fn part_2(elves: &HashMap<i32, i32>) -> i32 {
 }
 
 pub fn main() {
-    let file_contents = fs::read_to_string("puzzles/day1.txt").unwrap();
+    let file_contents = fs::read_to_string("../puzzles/day1.txt").unwrap();
     let elves_map = get_elves(&file_contents);
 
     let first_answer = part_1(&elves_map);

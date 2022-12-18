@@ -57,7 +57,7 @@ fn part_2(file_str: &str) -> usize {
 }
 
 fn main() {
-    let file_contents = fs::read_to_string("puzzles/day4.txt").unwrap();
+    let file_contents = fs::read_to_string("../puzzles/day4.txt").unwrap();
     let file_str = file_contents.trim();
 
     let first_answer = part_1(file_str);
