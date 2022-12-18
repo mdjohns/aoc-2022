@@ -1,0 +1,169 @@
+# Day 6
+
+```elixir
+Mix.install([
+  {:kino, "~> 0.8.0"}
+])
+```
+
+## Puzzle Input
+
+```elixir
+input = Kino.Input.textarea("Paste puzzle input")
+```
+
+## Module
+
+```elixir
+defmodule Day6 do
+  def reduce_until_marker(element, acc) do
+    count = Enum.count(acc)
+
+    cond do
+      # we need at least 4 characters to compare
+      3 > count ->
+        {:cont, [element | acc]}
+
+      # we have 4 characters (acc + current), are they unique?
+      true ->
+        new_count = Enum.count([element | acc])
+        uniq_count = Enum.uniq_by([element | acc], fn {x, _} -> x end) |> Enum.count()
+
+        cond do
+          # all characters are unique, return the position of the newest character
+          new_count == uniq_count ->
+            {_, marker_index} = element
+            {:halt, marker_index + 1}
+
+          # all characters are not unique, remove the oldest character and start over
+          true ->
+            [_ | rest] = Enum.reverse(acc)
+            {:cont, [element | Enum.reverse(rest)]}
+        end
+    end
+  end
+
+  def reduce_until_marker_part_2(element, acc) do
+    count = Enum.count(acc)
+
+    cond do
+      # we need at least 14 characters to compare
+      13 > count ->
+        {:cont, [element | acc]}
+
+      # we have 14 characters (acc + current), are they unique?
+      true ->
+        new_count = Enum.count([element | acc])
+        uniq_count = Enum.uniq_by([element | acc], fn {x, _} -> x end) |> Enum.count()
+
+        cond do
+          # all characters are unique, return the position of the newest character
+          new_count == uniq_count ->
+            {_, marker_index} = element
+            {:halt, marker_index + 1}
+
+          # all characters are not unique, remove the oldest character and start over
+          true ->
+            [_ | rest] = Enum.reverse(acc)
+            {:cont, [element | Enum.reverse(rest)]}
+        end
+    end
+  end
+
+  def find_first_marker(input) do
+    input
+    |> String.split("", trim: true)
+    |> Enum.with_index()
+    |> Enum.reduce_while([], &Day6.reduce_until_marker/2)
+  end
+
+  def find_first_message_marker(input) do
+    input
+    |> String.split("", trim: true)
+    |> Enum.with_index()
+    |> Enum.reduce_while([], &Day6.reduce_until_marker_part_2/2)
+  end
+end
+```
+
+## Part 1
+
+```elixir
+ExUnit.start(auto_run: false)
+
+defmodule ExampleTest do
+  use ExUnit.Case, async: false
+
+  describe "find first marker after:" do
+    test "character 5" do
+      assert Day6.find_first_marker("bvwbjplbgvbhsrlpgdmjqwftvncz") == 5
+    end
+
+    test "character 6" do
+      assert Day6.find_first_marker("nppdvjthqldpwncqszvftbrmjlhg") == 6
+    end
+
+    test "character 7" do
+      assert Day6.find_first_marker("mjqjpqmgbljsphdztnvjfqwrcgsmlb") == 7
+    end
+
+    test "character 10" do
+      assert Day6.find_first_marker("nznrnfrfntjfmvfwmzdfjlvtqnbhcprsg") == 10
+    end
+
+    test "character 11" do
+      assert Day6.find_first_marker("zcfzfwzzqfrljwzlrfnpqdbhtmscgvjw") == 11
+    end
+  end
+end
+
+ExUnit.run()
+```
+
+```elixir
+# Part 1
+
+Kino.Input.read(input)
+|> Day6.find_first_marker()
+```
+
+## Part 2
+
+```elixir
+ExUnit.start(auto_run: false)
+
+defmodule ExampleTest do
+  use ExUnit.Case, async: false
+
+  describe "find first message marker after:" do
+    test "character 19" do
+      assert Day6.find_first_message_marker("mjqjpqmgbljsphdztnvjfqwrcgsmlb") == 19
+    end
+
+    test "character 23" do
+      assert Day6.find_first_message_marker("bvwbjplbgvbhsrlpgdmjqwftvncz") == 23
+    end
+
+    test "character 23 again" do
+      assert Day6.find_first_message_marker("nppdvjthqldpwncqszvftbrmjlhg") == 23
+    end
+
+    test "character 29" do
+      assert Day6.find_first_message_marker("nznrnfrfntjfmvfwmzdfjlvtqnbhcprsg") == 29
+    end
+
+    test "character 26" do
+      assert Day6.find_first_message_marker("zcfzfwzzqfrljwzlrfnpqdbhtmscgvjw") == 26
+    end
+  end
+end
+
+ExUnit.run()
+```
+
+```elixir
+# Part 2
+
+Kino.Input.read(input)
+|> Day6.find_first_message_marker()
+```
