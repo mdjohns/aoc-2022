@@ -1,0 +1,140 @@
+# Day 5
+
+```elixir
+Mix.install([
+  {:kino, "~> 0.8.0"}
+])
+```
+
+## Puzzle Input
+
+```elixir
+input = Kino.Input.textarea("Paste puzzle input")
+```
+
+```elixir
+defmodule Day5 do
+  def stack_line?(line), do: String.contains?(line, "[")
+  defp empty_string?(char), do: char == ""
+
+  def line_to_chars(line) do
+    line
+    |> String.split("")
+    |> Enum.reject(&empty_string?/1)
+  end
+
+  def chars_to_chunk(chars) do
+    chars
+    |> Enum.chunk_every(4)
+  end
+
+  def join_and_index_chunks(chunks) do
+    chunks
+    |> Enum.map(fn chunk -> Enum.join(chunk, "") |> String.trim() end)
+    |> Enum.with_index(1)
+  end
+
+  # first `.reduce` iteration
+  def reduce_lines({"", _index}, acc), do: acc
+
+  def reduce_lines({value, index}, stacks_map) do
+    Map.update(stacks_map, index, [value], fn current_value ->
+      Enum.concat(current_value, [value])
+    end)
+  end
+
+  def map_instruction([_, move, _, from, _, to]) do
+    %{
+      :move => String.to_integer(move),
+      :from => String.to_integer(from),
+      :to => String.to_integer(to)
+    }
+  end
+
+  def apply_instruction_to_stacks(current_instruction, stacks) do
+    %{from: from, move: move, to: to} = current_instruction
+
+    existing = Map.get(stacks, to)
+
+    {taken, left_over} =
+      Map.get(stacks, from)
+      |> Enum.split(move)
+
+    new_to = Enum.concat(Enum.reverse(taken), existing)
+
+    %{stacks | from => left_over, to => new_to}
+  end
+
+  def apply_instructions_to_stacks_part_2(current_instruction, stacks) do
+    %{from: from, move: move, to: to} = current_instruction
+
+    existing = Map.get(stacks, to)
+
+    {taken, left_over} =
+      Map.get(stacks, from)
+      |> Enum.split(move)
+
+    new_to = Enum.concat(taken, existing)
+
+    %{stacks | from => left_over, to => new_to}
+  end
+end
+```
+
+## Part 1
+
+```elixir
+[top, bottom] =
+  Kino.Input.read(input)
+  |> String.split("\n\n")
+
+stacks =
+  top
+  |> String.split("\n")
+  |> Enum.take_while(&Day5.stack_line?/1)
+  |> Enum.map(&Day5.line_to_chars/1)
+  |> Enum.map(&Day5.chars_to_chunk/1)
+  |> Enum.map(&Day5.join_and_index_chunks/1)
+  |> Enum.concat()
+  |> Enum.reduce(%{}, &Day5.reduce_lines/2)
+
+instructions =
+  bottom
+  |> String.split("\n")
+  |> Enum.map(fn instruction -> String.split(instruction, " ") end)
+  |> Enum.map(&Day5.map_instruction/1)
+  |> Enum.reduce(stacks, &Day5.apply_instruction_to_stacks/2)
+  |> Map.values()
+  |> Enum.map(fn v -> Enum.at(v, 0) end)
+  |> Enum.map(fn s -> String.replace(s, "[", "") |> String.replace("]", "") end)
+  |> Enum.join()
+```
+
+## Part 2
+
+```elixir
+[top, bottom] =
+  Kino.Input.read(input)
+  |> String.split("\n\n")
+
+stacks =
+  top
+  |> String.split("\n")
+  |> Enum.take_while(&Day5.stack_line?/1)
+  |> Enum.map(&Day5.line_to_chars/1)
+  |> Enum.map(&Day5.chars_to_chunk/1)
+  |> Enum.map(&Day5.join_and_index_chunks/1)
+  |> Enum.concat()
+  |> Enum.reduce(%{}, &Day5.reduce_lines/2)
+
+instructions =
+  bottom
+  |> String.split("\n")
+  |> Enum.map(fn instruction -> String.split(instruction, " ") end)
+  |> Enum.map(&Day5.map_instruction/1)
+  |> Enum.reduce(stacks, &Day5.apply_instructions_to_stacks_part_2/2)
+  |> Map.values()
+  |> Enum.map(fn v -> Enum.at(v, 0) end)
+  |> Enum.map(fn s -> String.replace(s, "[", "") |> String.replace("]", "") end)
+  |> Enum.join()
+```
